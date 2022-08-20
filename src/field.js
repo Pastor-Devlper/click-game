@@ -12,8 +12,8 @@ export default class Field {
     this.field.addEventListener('click', this.onClick);
   }
 
-  setClickListener(onNewClick) {
-    this.onItemClick = onNewClick;
+  setClickListener(onItemClick) {
+    this.onItemClick = onItemClick;
   }
 
   init() {
@@ -41,14 +41,7 @@ export default class Field {
   }
 
   onClick = (event) => {
-    const target = event.target;
-    if (target.matches('.carrot')) {
-      target.remove();
-      sound.playCarrot();
-      this.onItemClick && this.onItemClick('carrot');
-    } else if (target.matches('.bug')) {
-      this.onItemClick && this.onItemClick('bug');
-    }
+    this.onItemClick && this.onItemClick(event);
   };
 }
 
