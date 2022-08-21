@@ -2,7 +2,36 @@
 import Field from './field.js';
 import * as sound from './sound.js';
 
-export default class Game {
+export const Reason = Object.freeze({
+  win: 'win',
+  lose: 'lose',
+  cancel: 'cancel',
+});
+
+//Builder Pattern
+export class GameBuilder {
+  withGameDuration(duration) {
+    this.gameDuration = duration;
+    return this;
+  }
+  withCarrotCount(num) {
+    this.carrotCount = num;
+    return this;
+  }
+  withBugCount(num) {
+    this.bugCount = num;
+    return this;
+  }
+  build() {
+    return new Game(
+      this.gameDuration, //
+      this.carrotCount, //
+      this.bugCount
+    );
+  }
+}
+
+class Game {
   constructor(gameDuration, carrotCount, bugCount) {
     this.gameDuration = gameDuration;
     this.carrotCount = carrotCount;
@@ -19,7 +48,7 @@ export default class Game {
     });
 
     this.gameField = new Field(this.carrotCount, this.bugCount);
-    this.gameField.setClickListener(this.onItemClick)
+    this.gameField.setClickListener(this.onItemClick);
 
     this.started = false;
     this.timer = undefined;
@@ -39,15 +68,15 @@ export default class Game {
     this.startGameTimer();
     sound.playBackground();
   }
-  
+
   stop() {
     this.started = false;
     this.stopGameTimer();
     this.hideGameButton();
     sound.playAlert();
     sound.stopBackground();
-    this.onGameStop && this.onGameStop('cancel');
-}
+    this.onGameStop && this.onGameStop(Reason.cancel);
+  }
 
   finish(win) {
     this.started = false;
@@ -59,7 +88,7 @@ export default class Game {
     }
     this.stopGameTimer();
     sound.stopBackground();
-    this.onGameStop && this.onGameStop(win ? 'win' : 'lose');
+    this.onGameStop && this.onGameStop(win ? Reason.win : Reason.lose);
   }
 
   onItemClick = (event) => {
@@ -78,12 +107,12 @@ export default class Game {
     } else if (target.matches('.bug')) {
       this.finish(false);
     }
-  }
+  };
 
   init() {
-  this.score = 0;
-  this.gameScore.innerText = this.carrotCount;
-  this.gameField.init();
+    this.score = 0;
+    this.gameScore.innerText = this.carrotCount;
+    this.gameField.init();
   }
 
   showStopButton() {
@@ -92,16 +121,16 @@ export default class Game {
     icon.classList.remove('fa-play');
     this.gameBtn.style.visibility = 'visible';
   }
-    
+
   hideGameButton() {
     this.gameBtn.style.visibility = 'hidden';
   }
-    
+
   showTimerAndScore() {
     this.timerIndicator.style.visibility = 'visible';
     this.gameScore.style.visibility = 'visible';
   }
-    
+
   startGameTimer() {
     let remainingTimeSec = this.gameDuration;
     this.updateTimerText(remainingTimeSec);
@@ -111,23 +140,21 @@ export default class Game {
         this.finishGame(this.score === this.carrotCount);
         return;
       }
-    this.updateTimerText(--remainingTimeSec);
+      this.updateTimerText(--remainingTimeSec);
     }, 1000);
   }
-    
+
   stopGameTimer() {
     clearInterval(this.timer);
   }
-    
+
   updateTimerText(time) {
     const minutes = Math.floor(time / 60);
     const seconds = time % 60;
     this.timerIndicator.innerHTML = `${minutes}:${seconds}`;
   }
-    
+
   updateScoreBoard() {
     this.gameScore.innerText = this.carrotCount - this.score;
+  }
 }
-
-}
-
